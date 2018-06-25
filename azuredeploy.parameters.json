@@ -3,13 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
 	"adminUsername": {
-	    "value": "adjoin"
+	    "value": "GEN-UNIQUE"
 	},
 	"adminPassword": {
-	    "value": "AdJoinD0main!"
+	    "value": "GEN-UNIQUE"
 	},
 	"vmssName": {
-	    "value": "adjoin"
+	    "value": "GEN-UNIQUE"
 	}
     }
 }
