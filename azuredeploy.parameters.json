@@ -3,13 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
 	"adminUsername": {
-	    "value": "azureuser"
+	    "value": "adjoin"
 	},
 	"adminPassword": {
-	    "value": "GEN-PASSWORD"
+	    "value": "AdJoinD0main!"
 	},
 	"vmssName": {
-	    "value": "GEN-UNIQUE-8"
+	    "value": "adjoin"
 	}
     }
 }
