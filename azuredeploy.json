@@ -2,28 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "vmSku": {
-      "type": "string",
-      "defaultValue": "Standard_D1",
-      "metadata": {
-        "description": "Size of VMs in the VM Scale Set."
-      }
-    },
-    "vmssName": {
-      "type": "string",
-      "metadata": {
-        "description": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended."
-      },
-      "maxLength": 61
-    },
-    "instanceCount": {
-      "type": "int",
-      "metadata": {
-        "description": "Number of VM instances (100 or less)."
-      },
-      "defaultValue": 2,
-      "maxValue": 100
-    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -37,7 +15,7 @@
       }
     },
     "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-vmss-custom-script-windows",
+      "defaultValue": "https://puppetdiag675.blob.core.windows.net/public",
       "type": "string",
       "metadata": {
         "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
@@ -52,9 +30,10 @@
     }
   },
   "variables": {
-    "vnetName": "vnet",
-    "subnetName": "subnet",
-    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]",
+    "vmssName": "vmssrds",
+    "vnetName": "rds",
+    "subnetName": "default",
+    "subnetRef": "/subscriptions/<subscription-id>resourceGroups/rds/providers/Microsoft.Network/virtualNetworks/rds/subnets/default",
     "publicIPAddressName": "pip",
     "loadBalancerName": "loadBalancer",
     "loadBalancerFrontEndName": "loadBalancerFrontEnd",
@@ -65,16 +44,15 @@
   "resources": [
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
-      "name": "[parameters('vmssName')]",
+      "name": "[variabless('vmssName')]",
       "location": "[resourceGroup().location]",
       "apiVersion": "2017-03-30",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
         "[resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]"
       ],
       "sku": {
-        "name": "[parameters('vmSku')]",
-        "capacity": "[parameters('instanceCount')]"
+        "name": "Standard_DS1_v2",
+        "capacity": "2"
       },
       "properties": {
         "overprovision": "true",
@@ -95,7 +73,7 @@
             }
           },
           "osProfile": {
-            "computerNamePrefix": "[parameters('vmssName')]",
+            "computerNamePrefix": "[variables('vmssName')]",
             "adminUsername": "[parameters('adminUsername')]",
             "adminPassword": "[parameters('adminPassword')]"
           },
@@ -137,13 +115,13 @@
                   "publisher": "Microsoft.Compute",
                   "settings": {
                     "fileUris": [
-                      "[concat(parameters('_artifactsLocation'), '/scripts/puppetagent.ps1')]"
+                      "[concat(parameters('_artifactsLocation'), '/puppet_agent_one_line.ps1')]"
                     ]
                   },
                   "typeHandlerVersion": "1.8",
                   "autoUpgradeMinorVersion": true,
                   "protectedSettings": {
-                    "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File puppetagent.ps1"
+                    "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File puppet_agent_one_line.ps1"
                   },
                   "type": "CustomScriptExtension"
                 }
@@ -151,27 +129,6 @@
             ]
           }
         }
-      }
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('vnetName')]",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2017-04-01",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "10.0.0.0/16"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "10.0.0.0/24"
-            }
-          }
-        ]
       }
     },
     {
